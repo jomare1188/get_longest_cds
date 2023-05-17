@@ -68,11 +68,12 @@ longest_cds_per_orthogroup.tsv should look like this
 
 It should create a file like this
 
-| OG0050894 | 623  | Co06022_k31_TRINITY_DN17292_c0_g1_i5            |
-| OG0144211 | 167  | KQB09-23137_k25_TRINITY_DN10990_c0_g1_i1         |
-| OG0159608 | 515  | QC02-402_k31_TRINITY_DN2307_c0_g1_i8             |
-| OG0173471 | 248  | CP74-2005_k31_TRINITY_DN71792_c1_g1_i3           |
-| OG0187226 | 1382 | MS6847_k31_TRINITY_DN17903_c0_g1_i3              |
+| Orthologue Group ID | Sequence Length | Protein ID                              |
+|--------------------|-----------------|-----------------------------------------|
+| OG0000000          | 2148            | US851008_k31_TRINITY_DN1636_c0_g1_i4    |
+| OG0000001          | 1155            | GXU-34176_k31_TRINITY_DN1184_c1_g1_i1   |
+| OG0000002          | 3018            | QS99-2014_k31_TRINITY_DN1107_c0_g1_i8   |
+| OG0000003          | 2616            | ROC26_k25_TRINITY_DN999_c0_g1_i8        |
 
 finally we extract the fasta sequences present in orthogroups_with_lengths.tsv from the CDS file
 if your cds file is a single-line fasta you can use:
