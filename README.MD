@@ -64,7 +64,7 @@ Then we look for the largest protein for each orthogroup using get_longest_trans
 ```sh
 python get_longest_transcript.py > longest_cds_per_orthogroup.tsv 
 ```
-longest_cds_per_orthogroup.tsv should look like this 
+longest_cds_per_orthogroup.tsv should look like this (note that te real file has no header) 
 
 It should create a file like this
 
@@ -79,6 +79,7 @@ finally we extract the fasta sequences present in orthogroups_with_lengths.tsv f
 if your cds file is a single-line fasta you can use:
 
 ```sh
-grep -A 1 -f <(cut -f 2 longest_cds_per_orthogroup.tsv) all_cds.fasta > longest_cds.fa
+cut -f3 longest_cds_per_orthogroup.tsv > longest_cds.ids
+grep -A 1 -f longest_cds.ids all_cds.fasta > longest_cds.fa
 ```
 
