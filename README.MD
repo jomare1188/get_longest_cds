@@ -6,39 +6,78 @@ This project is designed to find the longest coding sequence (CDS) for each orth
 
 - Python 3.x
 - Biopython (Python module)
-- Orthofinder software
-- Fasta sequences of coding sequences (CDS)
 
-## Project Files
+## Input files
 
-- `longest_cds.fa`: Fasta file containing the coding sequences
-- `test.orthogroups_for_CDS_.fix.tsv`: Tab-separated file containing orthogroups in the first column and transcript IDs in the second column
-- `get_lenghts.py`: Python script that calculates the length of each sequence in `test.orthogroups_for_CDS_.fix.tsv` and creates `test.orthogroups_with_lengths.tsv`
-- `longest_cds_per_orthogroup.tsv`: Tab-separated file containing orthogroups in the first column and longest transcript IDs in the second column
-- `get_longest_transcript.py`: Python script that identifies the longest transcript for each orthogroup and creates `longest_cds_per_orthogroup.tsv`
-- `test.cds.fasta`: Fasta file containing all CDS sequences
+- `longest_cds.fa`: Fasta file containing the coding sequences: "/Storage/data1/jorge.munoz/GET_CDS/new_all_CDS.fa"
+- `Orthogroups.tsv`: Orthofinder generated file (inflation value = 6): "/Storage/data1/jorge.munoz/GET_CDS/Orthogroups.tsv"
 
 ## Workflow
 
-1. Obtain the `longest_cds.fa` file containing the CDS sequences and the `test.orthogroups_for_CDS_.fix.tsv` file containing the orthogroups and transcript IDs. The latter file can be obtained by running `reformatOrthoFinderGroups.pl` over `Orthogroups.tsv` from Orthofinder and extracting the orthogroups and transcripts IDs.
+First you have to reformat Orthogroups.tsv to fet a tab separated file with orthogroups in first column and protein ID in second column, you can do it by using reformatOrthoFinderGroups.pl
 
-2. Run `get_lenghts.py` over `test.orthogroups_for_CDS_.fix.tsv` to calculate the length of each sequence and create `test.orthogroups_with_lengths.tsv`. This script requires the Biopython module.
+```sh
+reformatOrthoFinderGroups.pl --infile Orthogroups.tsv
+```
+it will create Orthogroups.tbl that should look like this
 
-3. Run `get_longest_transcript.py` to identify the longest transcript for each orthogroup and create `longest_cds_per_orthogroup.tsv`.
+| Orthologue Group ID | Species            | ProteinID                    |
+|--------------------|--------------------|------------------------------|
+| OG0000000          | B1_PEP.fix.nr100   | B1_k25_TRINITY_DN1487_c0_g1_i1 |
+| OG0000000          | B1_PEP.fix.nr100   | B1_k25_TRINITY_DN1487_c0_g1_i7 |
+| OG0000000          | B1_PEP.fix.nr100   | B1_k25_TRINITY_DN1526_c0_g1_i1 |
+| OG0000000          | B1_PEP.fix.nr100   | B1_k25_TRINITY_DN1526_c0_g1_i2 |
 
-4. Use bash commands to extract the transcript IDs in `longest_cds_per_orthogroup.tsv` and extract the sequences in `test.cds.fasta`.
+We only need first and third column, we extract them using some bash
 
-## Usage
+```sh
+cut -f1,3 Orthogroups.tbl > Orthogroups_for_longest_cds.tsv
+```
+In this step maybe is possible that IDs in CDS file are not the same as in the Orthogroups_for_longest_cds.tsv so you need to fix it.
+here we provide fix_names.sh with some regex who might be useful to you.
 
-1. Clone the repository: `git clone https://github.com/<USERNAME>/<REPO>.git`
+Later we need to measure the lenghts of each sequence in Orthogroups_for_longest_cds.tsv using get_lenghts.py:
+you need to specify in the scripts the paths to the file with cds sequences, to the  reformated Orthofinder.tsv file (Orthogroups_for_longest_cds.tsv) and to the output file (Orthogroups_with_lenghts.tsv)
 
-2. Place the required files in the same directory as the Python scripts.
+```sh
+python get_lenghts.py
+```
+The file should contain in the first column the Orthogroup, in the second column the protein id and in the third column the protein lenght
 
-3. Run the scripts in the order specified above using the command line: `python <SCRIPT_NAME.py>`
+| Orthologue Group ID| Protein-ID                                 | Protein lenght                          |
+|--------------------|--------------------------------------------|-----------------------------------------|
+| OG0634775          | US851008_k31_TRINITY_DN36197_c0_g1_i1      | 383                                     |
+| OG0634775          | QC02-402_k25_TRINITY_DN5964_c0_g1_i5       | 455                                     |
+| OG0361999          | QBYN04-26041_k31_TRINITY_DN1071_c0_g1_i20  | 5075                                    |
+| OG0361999          | KQB07-24619_k25_TRINITY_DN319_c0_g1_i12    | 5078                                    |
+| OG0361999          | KQB07-24619_k25_TRINITY_DN319_c0_g1_i1     | 5450                                    |
 
-4. The output files will be generated in the same directory.
 
-## License
+Maybe if there is some sequence missing you should exclude NAs
 
-This project is licensed under the MIT License - see the `LICENSE` file for details.
+```sh
+grep -v -w NA Orthogroups_with_lenghts.tsv > no_NA_Orthogroups_with_lenghts.tsv
+```
+
+Then we look for the largest protein for each orthogroup using get_longest_transcript.py, you need to configure the name of the orthogrups file with lenghts in the file.
+
+```sh
+python get_longest_transcript.py > longest_cds_per_orthogroup.tsv 
+```
+longest_cds_per_orthogroup.tsv should look like this 
+
+It should create a file like this
+
+| OG0050894 | 623  | Co06022_k31_TRINITY_DN17292_c0_g1_i5            |
+| OG0144211 | 167  | KQB09-23137_k25_TRINITY_DN10990_c0_g1_i1         |
+| OG0159608 | 515  | QC02-402_k31_TRINITY_DN2307_c0_g1_i8             |
+| OG0173471 | 248  | CP74-2005_k31_TRINITY_DN71792_c1_g1_i3           |
+| OG0187226 | 1382 | MS6847_k31_TRINITY_DN17903_c0_g1_i3              |
+
+finally we extract the fasta sequences present in orthogroups_with_lengths.tsv from the CDS file
+if your cds file is a single-line fasta you can use:
+
+```sh
+grep -A 1 -f <(cut -f 2 longest_cds_per_orthogroup.tsv) all_cds.fasta > longest_cds.fa
+```
 

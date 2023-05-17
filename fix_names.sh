@@ -1,0 +1,1 @@
+perl -e 'while(<>){chomp;@a=split(/\t/); if($a[1]=~/^(F1_.+)$/){ print "$a[0]\t$a[1]\n"}elsif($a[1]=~/^SP80_3280_(.*)$/){print "$a[0]\tSP80-3280_$1\n"}elsif($a[1]=~/^(.+)_(.+)_(k[23][15]_.+)$/){print "$a[0]\t$1-$2_$3\n"}else{print "$_\n"}}' orthogroups_for_getCDS_I6.tsv > orthogroups_for_getCDS_I6.fix.tsv
